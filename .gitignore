@@ -1,3 +1,4 @@
 # All user files are stored as .dat 
 # These files contain relative coordinates and other saved data for each turtle
-*.dat 
+*/*/*.dat
+computer/0/previousMine.dat
