@@ -15,7 +15,7 @@ end
     -- Inspect all blocks surrounding the turtle and store them along with relative position X,Y,Z
     -- Using this information I could parse it into a local web page and use it to track the turtle progress
     -- This could then be adapated into making rooms for a base or even mapping out my base
-
+    -- Mark when it has found diamonds, along with their relative coords.
 
 function moveForward()
     if(not turtle.detect()) then
@@ -50,6 +50,7 @@ function checkSlots()
 end
 
 function checkBranch()
+    fastEnd = false
     -- Start Left Branch
     if(relativePosition.x == lastTunnel.x+3 and relativePosition.direction == 0) then
         turtle.turnLeft()
@@ -79,9 +80,14 @@ function checkBranch()
         lastTunnel.z = relativePosition.z
         relativePosition.tunnelsComplete = relativePosition.tunnelsComplete + 1
     end
-
+    if (checkSlots() >= 10) then
+        disposeItems()
+        if (checkSlots() >= 10) then
+            fastEnd = true
+        end
+    end
     -- Return to home once complete
-    if(relativePosition.z == 0 and relativePosition.direction == 0 and (relativePosition.tunnelsComplete >= tonumber(args[2]) or checkSlots() >= 7)) then
+    if(relativePosition.z == 0 and relativePosition.direction == 0 and (relativePosition.tunnelsComplete >= tonumber(args[2]) or fastEnd)) then
         turtle.turnLeft()
         turtle.turnLeft()
         relativePosition.direction = 2
