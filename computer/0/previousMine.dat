@@ -1,0 +1,11 @@
+{
+  y = 0,
+  x = 3,
+  z = -8,
+  args = {
+    "10",
+    "10",
+  },
+  tunnelsComplete = 0,
+  direction = 3,
+}
