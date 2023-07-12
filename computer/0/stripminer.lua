@@ -543,12 +543,12 @@ function checkBranch(ws)
         mapVerticalSurroundings(ws)
         turtle.turnRight()
         relativePosition.direction = 0
-        mine()
-        moveForward()
-        mine()
-        moveForward()
-        mine()
-        moveForward()
+        for i=1, 4, 1 do 
+            mine()
+            moveForward()
+            mapSurroundings(ws)
+            mapVerticalSurroundings(ws)
+        end
         turtle.turnRight()
         relativePosition.direction = 1
     end
@@ -682,6 +682,7 @@ end
 
 function sendBlockData(ws, block) -- Send the blocks to the left, right, top, botton, and front of turtle
     ws.send(json.encode(block))
+    ws.send(json.encode(relativePosition))
 end
 
 function setupWebsocket()
@@ -690,7 +691,6 @@ function setupWebsocket()
 end 
 
 function mapSurroundings(ws)
-
     
     local j = 0
     while j < 4 do 
@@ -776,6 +776,7 @@ relativePosition = {
     z = 0,
     direction = 0,
     tunnelsComplete = 0,
+    turtleID = os.getComputerLabel(),
 }
 data = {
     x = 0,
