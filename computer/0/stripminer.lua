@@ -477,11 +477,12 @@ end
 -- Main Code 
 
 
-function mineloop()
+function mineloop(ws)
     
     mine()
     checkSlots()
     moveForward()
+    sendData(ws)
     savePosition()
     checkBranch()
     
@@ -629,8 +630,8 @@ function main()
         args = data.args
 
     end
-    while false do
-        mineloop()
+    while true do
+        mineloop(ws)
     end
 end
 
@@ -667,13 +668,26 @@ function savePosition()
     currentOperation:close(currentOperation)
 end
 
+function sendData(ws)
+    ws.send(json.encode(
+        {
+            positionData=relativePosition,
+            arguments=args,
+        }
+    ))
+end
+
+function sendBlockData(ws) -- Send the blocks to the left, right, top, botton, and front of turtle
+    blocks = mapSurroundings()
+end
+
 function setupWebsocket()
     local ws, err = http.websocket("ws://localhost:7071")
     return ws, err
 end 
 
 function mapSurroundings()
-
+    
 end
 
     -- Pos X = Forward
