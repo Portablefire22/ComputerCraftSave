@@ -485,7 +485,7 @@ function mineloop(ws)
     checkSlots()
     moveForward()
     savePosition()
-    checkBranch()
+    checkBranch(ws)
     
 end
 
@@ -529,7 +529,7 @@ function checkSlots()
     return slotsInUse
 end
 
-function checkBranch()
+function checkBranch(ws)
     fastEnd = false
     -- Start Left Branch
     if(relativePosition.x == lastTunnel.x+3 and relativePosition.direction == 0) then
@@ -539,6 +539,8 @@ function checkBranch()
 
     -- Turn right at end of left branch
     if(relativePosition.z == -tonumber(args[1])) then
+        mapSurroundings(ws)
+        mapVerticalSurroundings(ws)
         turtle.turnRight()
         relativePosition.direction = 0
         mine()
@@ -689,14 +691,15 @@ end
 
 function mapSurroundings(ws)
 
-    local block = {
-        blockName = "Null",
-        x = relativePosition.x,
-        y = relativePosition.y,
-        z = relativePosition.z,
-    }
+    
     local j = 0
     while j < 4 do 
+        local block = {
+            blockName = "Null",
+            x = relativePosition.x,
+            y = relativePosition.y,
+            z = relativePosition.z,
+        }
         local exists, data = turtle.inspect()
         if exists then
             block.blockName = data.name
@@ -741,6 +744,7 @@ function mapVerticalSurroundings(ws)
     end
     block.y = relativePosition.y + 1 
     sendBlockData(ws, block)
+    mapSurroundings(ws)
     turtle.down()
     relativePosition.y = relativePosition.y - 1
     turtle.down()
@@ -753,6 +757,7 @@ function mapVerticalSurroundings(ws)
     end
     block.y = relativePosition.y - 1 
     sendBlockData(ws, block)
+    mapSurroundings(ws)
     turtle.up()
     relativePosition.y = relativePosition.y + 1
 end
