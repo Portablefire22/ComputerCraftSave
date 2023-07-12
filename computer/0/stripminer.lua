@@ -480,9 +480,10 @@ end
 function mineloop(ws)
     
     mine()
+    mapSurroundings(ws)
+    mapVerticalSurroundings(ws)
     checkSlots()
     moveForward()
-    sendData(ws)
     savePosition()
     checkBranch()
     
@@ -677,8 +678,8 @@ function sendData(ws)
     ))
 end
 
-function sendBlockData(ws) -- Send the blocks to the left, right, top, botton, and front of turtle
-    blocks = mapSurroundings()
+function sendBlockData(ws, block) -- Send the blocks to the left, right, top, botton, and front of turtle
+    ws.send(json.encode(block))
 end
 
 function setupWebsocket()
@@ -686,10 +687,75 @@ function setupWebsocket()
     return ws, err
 end 
 
-function mapSurroundings()
-    
+function mapSurroundings(ws)
+
+    local block = {
+        blockName = "Null",
+        x = relativePosition.x,
+        y = relativePosition.y,
+        z = relativePosition.z,
+    }
+    local j = 0
+    while j < 4 do 
+        local exists, data = turtle.inspect()
+        if exists then
+            block.blockName = data.name
+        else
+            block.blockName = "minecraft:air"
+        end
+        if(relativePosition.direction == 0) then
+            block.x = relativePosition.x + 1
+        elseif (relativePosition.direction == 1) then
+            block.z = relativePosition.z + 1
+        elseif (relativePosition.direction == 2) then
+            block.x = relativePosition.x - 1
+        elseif (relativePosition.direction == 3) then
+            block.z = relativePosition.z - 1
+        else 
+            print("Direction not found.")
+        end
+        sendBlockData(ws, block)
+        relativePosition.direction = relativePosition.direction + 1
+        if relativePosition.direction == 4 then
+            relativePosition.direction = 0
+        end 
+        turtle.turnRight()
+        j = j + 1 
+    end
 end
 
+function mapVerticalSurroundings(ws)
+    local block = {
+        blockName = "Null",
+        x = relativePosition.x,
+        y = relativePosition.y,
+        z = relativePosition.z,
+    }
+    turtle.up()
+    relativePosition.y = relativePosition.y + 1
+    local exists, data = turtle.inspectUp()
+    if exists then 
+        block.blockName = data.name
+    else
+        block.blockName = "minecraft:air"
+    end
+    block.y = relativePosition.y + 1 
+    sendBlockData(ws, block)
+    turtle.down()
+    relativePosition.y = relativePosition.y - 1
+    turtle.down()
+    relativePosition.y = relativePosition.y - 1
+    local exists, data = turtle.inspectDown()
+    if exists then 
+        block.blockName = data.name
+    else
+        block.blockName = "minecraft:air"
+    end
+    block.y = relativePosition.y - 1 
+    sendBlockData(ws, block)
+    turtle.up()
+    relativePosition.y = relativePosition.y + 1
+end
     -- Pos X = Forward
     -- Pos Y = Up
     -- Pos Z = Right
@@ -729,12 +795,6 @@ saveFile = {
     args = {},
 }
 
-block = {
-    blockName = "Null",
-    x = 0,
-    y = 0,
-    z = 0,
-}
 
 
 
