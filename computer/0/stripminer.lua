@@ -123,6 +123,21 @@ function mine()
 end
 
 function main()
+
+    local ws, err = setupWebsocket() 
+    if err then
+        print("Failed to establish connection")
+        print("Error:", err)
+        return
+    elseif ws then 
+        local message = "Turtle '" .. os.getComputerLabel() .. "' connected."
+        ws.send(message)
+        local msg, bin = ws.receive() -- Response
+        if msg then
+            print("Received: " .. msg);
+        end
+    end
+
     if(string.upper(args[1]) == "CONTINUE") then 
         previousOperation = io.open("previousMine.dat", "r")
         data = {}
@@ -136,7 +151,7 @@ function main()
         args = data.args
 
     end
-    while true do
+    while false do
         mineloop()
     end
 end
@@ -172,6 +187,15 @@ function savePosition()
     currentOperation = io.open("previousMine.dat", "w")
     currentOperation:write(textutils.serialize(saveFile))
     currentOperation:close(currentOperation)
+end
+
+function setupWebsocket()
+    local ws, err = http.websocket("ws://localhost:7071")
+    return ws, err
+end 
+
+function mapSurroundings()
+
 end
 
     -- Pos X = Forward
@@ -211,6 +235,13 @@ saveFile = {
     direction = 0,
     tunnelsComplete = 0,
     args = {},
+}
+
+block = {
+    blockName = "Null",
+    x = 0,
+    y = 0,
+    z = 0,
 }
 
 
