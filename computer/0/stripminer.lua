@@ -578,7 +578,7 @@ function checkBranch(ws)
     -- Stop after basing
     if(relativePosition.x == 0 and relativePosition.direction == 2) then
         os.exit()
-    end 
+    end         
     
 end
 
@@ -607,18 +607,6 @@ end
 function main()
 
     local ws, err = setupWebsocket() 
-    if err then
-        print("Failed to establish connection")
-        print("Error:", err)
-        return
-    elseif ws then 
-        local message = "Turtle '" .. os.getComputerLabel() .. "' connected."
-        ws.send(message)
-        local msg, bin = ws.receive() -- Response
-        if msg then
-            print("Received: " .. msg);
-        end
-    end
 
     if(string.upper(args[1]) == "CONTINUE") then 
         previousOperation = io.open("previousMine.dat", "r")
@@ -687,8 +675,22 @@ end
 
 function setupWebsocket()
     local ws, err = http.websocket("ws://localhost:7071")
-    return ws, err
-end 
+    if err then
+        print("Failed to establish connection")
+        print("Error:", err)
+        return
+    elseif ws then 
+        local message = os.getComputerLabel() .. ":CONNECTION"
+        ws.send(message)
+        local msg, bin = ws.receive() -- Response
+        if msg then
+            print("Received: " .. msg)
+        end
+    end
+    --local message = os.getComputerLabel() .. ":STORAGE:" .. "HEWWO"
+    --ws.send(message)
+    return ws
+end
 
 function mapSurroundings(ws)
     
@@ -776,7 +778,6 @@ relativePosition = {
     z = 0,
     direction = 0,
     tunnelsComplete = 0,
-    turtleID = os.getComputerLabel(),
 }
 data = {
     x = 0,

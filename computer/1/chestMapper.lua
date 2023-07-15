@@ -474,6 +474,26 @@ function json.decode(str)
 end
 -- Begin my code
 
+function main()
+    local ws = setupWebsocket()
+    if #args >= 1 then
+        if string.upper(args[1]) == "WIPE" then
+            sendData(ws, relativePosition)
+        end
+    else 
+        local message = os.getComputerLabel() .. ".POSITION." .. "GET"
+        ws.send(message)
+        local msg, bin = ws.receive()
+        if msg then
+            msg = json.decode(msg)
+            relativePosition.x = msg.x
+            relativePosition.y = msg.y
+            relativePosition.z = msg.z
+            relativePosition.direction = msg.direction
+        end
+    end
+end 
+
 
 function setupWebsocket()
     local ws, err = http.websocket("ws://localhost:7071")
@@ -482,11 +502,32 @@ function setupWebsocket()
         print("Error:", err)
         return
     elseif ws then 
-        local message = "Turtle '" .. os.getComputerLabel() .. "' connected."
+        local message = os.getComputerLabel() .. ".CONNECTION"
         ws.send(message)
         local msg, bin = ws.receive() -- Response
         if msg then
-            print("Received: " .. msg);
+            print("Received: " .. msg)
         end
     end
+    --local message = os.getComputerLabel() .. ":STORAGE:" .. "HEWWO"
+    --ws.send(message)
+    return ws
 end
+
+function sendData(ws, data)
+    local message = os.getComputerLabel() .. ".POSITION." .. "POST." .. json.encode(data)
+    ws.send(message)
+end
+
+relativePosition = {
+    x = 0,
+    y = 0,
+    z = 0,
+    direction = 0,
+    tunnelsComplete = 0,
+}
+
+args = {...}
+
+
+main()
