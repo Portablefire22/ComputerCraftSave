@@ -476,21 +476,25 @@ end
 
 function main()
     local ws = setupWebsocket()
-    if #args >= 1 then
-        if string.upper(args[1]) == "WIPE" then
-            sendData(ws, relativePosition)
+    if ws ~= false then
+        if #args >= 1 then
+            if string.upper(args[1]) == "WIPE" then
+                sendData(ws)
+            end
+        else 
+            local message = os.getComputerLabel() .. ".POSITION." .. "GET"
+            ws.send(message)
+            local msg, bin = ws.receive()
+            if msg then
+                msg = json.decode(msg)
+                relativePosition.x = msg.x
+                relativePosition.y = msg.y
+                relativePosition.z = msg.z
+                relativePosition.direction = msg.direction
+            end
         end
-    else 
-        local message = os.getComputerLabel() .. ".POSITION." .. "GET"
-        ws.send(message)
-        local msg, bin = ws.receive()
-        if msg then
-            msg = json.decode(msg)
-            relativePosition.x = msg.x
-            relativePosition.y = msg.y
-            relativePosition.z = msg.z
-            relativePosition.direction = msg.direction
-        end
+    else
+        return
     end
 end 
 
@@ -500,7 +504,7 @@ function setupWebsocket()
     if err then
         print("Failed to establish connection")
         print("Error:", err)
-        return
+        return false
     elseif ws then 
         local message = os.getComputerLabel() .. ".CONNECTION"
         ws.send(message)
@@ -514,8 +518,8 @@ function setupWebsocket()
     return ws
 end
 
-function sendData(ws, data)
-    local message = os.getComputerLabel() .. ".POSITION." .. "POST." .. json.encode(data)
+function sendPositionData(ws)
+    local message = os.getComputerLabel() .. ".POSITION." .. "POST." .. json.encode(relativePosition)
     ws.send(message)
 end
 
