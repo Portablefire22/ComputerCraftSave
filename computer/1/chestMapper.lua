@@ -496,8 +496,68 @@ function main()
     else
         return
     end
+    mapChests(ws)
 end 
 
+function mapChests(ws)
+    chest = {
+        contents = nil,
+        x = relativePosition.x,
+        y = relativePosition.y,
+        z = relativePosition.z,
+    }
+    local successUp, dataUp = turtle.inspectUp()
+    while not successUp do
+        successUp, dataUp = turtle.inspectUp()
+        print(successUp)
+        for i = 0, 3, 1 do 
+            local success, data = turtle.inspect()
+            if success then 
+                if data.name == "minecraft:chest" then
+                    local blockPos = getBlockPosition()
+                    chest.x, chest.y, chest.z = blockPos.x,blockPos.y,blockPos.z
+                    chestBlock = peripheral.wrap("front")
+                    chest.contents = chestBlock.list()
+                    local message = os.getComputerLabel() .. ".STORAGE.SAVE." .. json.encode(chest)
+                    ws.send(message)
+                end
+            end
+            turtle.turnRight()
+            relativePosition.direction = relativePosition.direction + 1 
+        end
+        relativePosition.direction = 0
+        turtle.up()
+        relativePosition.y = relativePosition.y + 1
+    end
+end
+
+function getBlockPosition()
+    -- Pos X = Forward
+    -- Pos Y = Up
+    -- Pos Z = Right
+    -- Directions
+    -- 0 = Origin
+    -- 1 = Right
+    -- 2 = Backwards
+    -- 3 = Left
+    local blockPosition = {
+        x = relativePosition.x,
+        y = relativePosition.y,
+        z = relativePosition.z,
+    }
+    if(relativePosition.direction == 0) then
+        blockPosition.x = relativePosition.x + 1
+    elseif (relativePosition.direction == 1) then
+        blockPosition.z = relativePosition.z + 1
+    elseif (relativePosition.direction == 2) then
+        blockPosition.x = relativePosition.x - 1
+    elseif (relativePosition.direction == 3) then
+        blockPosition.z = relativePosition.z - 1
+    else 
+        print("Direction not found.")
+    end
+    return blockPosition
+end
 
 function setupWebsocket()
     local ws, err = http.websocket("ws://localhost:7071")
