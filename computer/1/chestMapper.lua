@@ -506,28 +506,80 @@ function mapChests(ws)
         y = relativePosition.y,
         z = relativePosition.z,
     }
-    local successUp, dataUp = turtle.inspectUp()
-    while not successUp do
-        successUp, dataUp = turtle.inspectUp()
-        print(successUp)
-        for i = 0, 3, 1 do 
-            local success, data = turtle.inspect()
-            if success then 
-                if data.name == "minecraft:chest" then
-                    local blockPos = getBlockPosition()
-                    chest.x, chest.y, chest.z = blockPos.x,blockPos.y,blockPos.z
-                    chestBlock = peripheral.wrap("front")
-                    chest.contents = chestBlock.list()
-                    local message = os.getComputerLabel() .. ".STORAGE.SAVE." .. json.encode(chest)
-                    ws.send(message)
+    local successFront, dataFront = turtle.inspect()
+    while not successFront do 
+        successFront, dataFront = turtle.inspect()
+        local successUp, dataUp = turtle.inspectUp()
+        while not successUp do
+            successUp, dataUp = turtle.inspectUp()
+            print(successUp)
+            for i = 0, 3, 1 do 
+                local success, data = turtle.inspect()
+                if success then 
+                    if data.name == "minecraft:chest" then
+                        local blockPos = getBlockPosition()
+                        chest.x, chest.y, chest.z = blockPos.x,blockPos.y,blockPos.z
+                        chestBlock = peripheral.wrap("front")
+                        chest.contents = chestBlock.list()
+                        local message = os.getComputerLabel() .. ".STORAGE.SAVE." .. json.encode(chest)
+                        ws.send(message)
+                    end
                 end
+                turtle.turnRight()
+                relativePosition.direction = relativePosition.direction + 1 
             end
-            turtle.turnRight()
-            relativePosition.direction = relativePosition.direction + 1 
+            relativePosition.direction = 0
+            turtle.up()
+            relativePosition.y = relativePosition.y + 1
         end
-        relativePosition.direction = 0
+        local successDown, dataDown = turtle.inspectDown()
+        while not successDown do
+            successDown, dataDown = turtle.inspectDown()
+            turtle.down()
+            relativePosition.y = relativePosition.y - 1
+        end
+        moveForward()
+    end
+    returnToBase()
+end
+
+function returnToBase()
+    while relativePosition.direction ~= 2 do 
+        turtle.turnRight()
+        relativePosition.direction = relativePosition.direction + 1
+    end
+    while relativePosition.y > 0 do
+        turtle.down()
+        relativePosition.y = relativePosition.y - 1
+    end
+    while relativePosition.y < 0 do
         turtle.up()
         relativePosition.y = relativePosition.y + 1
+    end
+    while relativePosition.x > 0 do
+        moveForward()
+    end
+    while relativePosition.direction ~= 4 do 
+        turtle.turnRight()
+        relativePosition.direction = relativePosition.direction + 1
+    end
+    relativePosition.direction = 0
+end
+
+function moveForward()
+    if(not turtle.detect()) then
+        turtle.forward()
+        if(relativePosition.direction == 0) then
+            relativePosition.x = relativePosition.x + 1
+        elseif (relativePosition.direction == 1) then
+            relativePosition.z = relativePosition.z + 1
+        elseif (relativePosition.direction == 2) then
+            relativePosition.x = relativePosition.x - 1
+        elseif (relativePosition.direction == 3) then
+            relativePosition.z = relativePosition.z - 1
+        else 
+            print("Direction not found.")
+        end
     end
 end
 
