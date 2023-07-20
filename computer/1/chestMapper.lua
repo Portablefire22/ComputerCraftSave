@@ -497,6 +497,7 @@ function main()
         return
     end
     mapChests(ws)
+    ws.close()
 end 
 
 function mapChests(ws)
@@ -647,3 +648,4 @@ args = {...}
 
 
 main()
+
