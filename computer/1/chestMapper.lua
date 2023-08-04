@@ -497,6 +497,7 @@ function main()
         return
     end
     mapChests(ws)
+    FindItem(ws)
     ws.close()
 end 
 
@@ -542,6 +543,13 @@ function mapChests(ws)
         moveForward()
     end
     returnToBase()
+end
+
+function FindItem(ws)
+  wantedItem = "minecraft:cobblestone"
+  local message = os.getComputerLabel() .. ".STORAGE.RETRIEVE." .. wantedItem .. ".10"
+  ws.send(message)
+  local msg, bin = ws.receive()
 end
 
 function returnToBase()
