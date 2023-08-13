@@ -496,7 +496,7 @@ function main()
     else
         return
     end
-    mapChests(ws)
+    --mapChests(ws)
     FindItem(ws)
     ws.close()
 end 
@@ -546,10 +546,50 @@ function mapChests(ws)
 end
 
 function FindItem(ws)
-  wantedItem = "minecraft:cobblestone"
-  local message = os.getComputerLabel() .. ".STORAGE.RETRIEVE." .. wantedItem .. ".10"
-  ws.send(message)
-  local msg, bin = ws.receive()
+    local wantedItem = "minecraft:cobbled_deepslate"
+    local message = os.getComputerLabel() .. ".STORAGE.RETRIEVE." .. wantedItem .. ".200"
+    ws.send(message)
+    local msg, bin = ws.receive()
+    print(json.decode(msg)['1']['itemsToTake'])
+end
+
+function pathToCoordinates(destination)
+    while relativePosition.y > destination.y do
+        moveDown()
+    end
+    while relativePosition.y < destination.y do 
+        moveUp()
+    end 
+end
+
+function turnRight()
+    turtle.turnRight()
+    relativePosition.direction = relativePosition.direction + 1
+    if relativePosition.direction >= 4 then
+        relativePosition.direction = 0
+    end
+end
+
+function turnLeft()
+    turtle.turnLeft()
+    relativePosition.direction = relativePosition.direction - 1
+    if relativePosition.direction <= -1 then
+        relativePosition.direction = 3
+    end
+end
+
+function moveUp()
+    if not turtle.detectUp() then
+        turtle.moveUp()
+        relativePosition.y = relativePosition.y + 1 
+    end
+end
+
+function moveDown()
+    if not turtle.detectDown() then
+        turtle.moveDown()
+        relativePosition.y = relativePosition.y - 1 
+    end
 end
 
 function returnToBase()
